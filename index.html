@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Mola - Empréstimo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        body { margin: 0; background-color: #E67E22; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .card { background: white; border-radius: 30px; padding: 30px 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        
+        .logo { font-family: 'Caveat', cursive; font-size: 42px; color: #E67E22; margin: 0; line-height: 1; }
+        .tagline { font-size: 12px; color: #777; margin-bottom: 20px; }
+
+        .title { font-family: 'Caveat', cursive; font-size: 28px; color: #333; margin-bottom: 25px; }
+
+        .calc-box { background: #fdfdfd; border: 1px solid #eee; border-radius: 16px; padding: 20px; margin-bottom: 15px; text-align: left; position: relative; }
+        .calc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .calc-label { font-size: 14px; color: #555; font-family: 'Caveat', cursive; font-weight: bold; }
+        .calc-value { font-size: 20px; color: #E67E22; font-weight: bold; }
+        
+        input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; margin-bottom: 5px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #E67E22; cursor: pointer; box-shadow: 0 2px 5px rgba(230,126,34,0.4); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #eee; border-radius: 3px; }
+        
+        .limits { display: flex; justify-content: space-between; font-size: 11px; color: #999; }
+
+        .result-box { background: #fff8f3; border: 1px solid #ffe4cc; border-radius: 16px; padding: 20px; margin-bottom: 25px; text-align: center; }
+        .result-label { font-family: 'Caveat', cursive; font-size: 18px; color: #555; margin-bottom: 5px; }
+        .result-value { font-size: 32px; color: #E67E22; font-weight: bold; }
+
+        .btn-main { width: 100%; background: #E67E22; color: white; font-size: 18px; font-weight: bold; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-family: 'Caveat', cursive; letter-spacing: 1px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="logo">e-Mola</h1>
+        <div class="tagline">Meu cell, minha mola</div>
+        
+        <div class="title">Calculadora de Empréstimo</div>
+
+        <div class="calc-box">
+            <div class="calc-header">
+                <span class="calc-label">Valor do Empréstimo</span>
+                <span class="calc-value" id="amountVal">25,000 MT</span>
+            </div>
+            <input type="range" id="amountSlider" min="10000" max="70000" step="1000" value="25000" oninput="calculate()">
+            <div class="limits"><span>10.000 MT</span><span>70.000 MT</span></div>
+        </div>
+
+        <div class="calc-box">
+            <div class="calc-header">
+                <span class="calc-label">Prazo do Empréstimo</span>
+                <span class="calc-value" id="termVal">6 Meses</span>
+            </div>
+            <input type="range" id="termSlider" min="1" max="12" step="1" value="6" oninput="calculate()">
+            <div class="limits"><span>1 Mês</span><span>12 Meses</span></div>
+        </div>
+
+        <div class="result-box">
+            <div class="result-label">Pagamento Mensal</div>
+            <div class="result-value" id="paymentVal">4666.67 MT</div>
+        </div>
+
+        <button class="btn-main" onclick="
+            sessionStorage.setItem('loanAmount', document.getElementById('amountSlider').value);
+            window.location.href = 'dados.html';
+        ">SOLICITAR AGORA</button>
+    </div>
+
+    <script>
+        function calculate() {
+            let amount = parseFloat(document.getElementById('amountSlider').value);
+            let term = parseFloat(document.getElementById('termSlider').value);
+            
+            document.getElementById('amountVal').innerText = amount.toLocaleString('pt-PT') + ' MT';
+            document.getElementById('termVal').innerText = term + (term === 1 ? ' Mês' : ' Meses');
+
+            // Exact math to match the screenshot (12% flat interest)
+            let total = amount * 1.12;
+            let monthly = total / term;
+
+            document.getElementById('paymentVal').innerText = monthly.toFixed(2).replace('.', ',') + ' MT';
+        }
+        calculate();
+    </script>
+</body>
+</html>
